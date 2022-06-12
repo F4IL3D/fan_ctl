@@ -1,0 +1,15 @@
+# https://unix.stackexchange.com/questions/460321/which-pid-belongs-into-the-systemd-pidfile-section-when-creating-a-shell-script
+[Unit]
+Description=IPMI Fan Controller
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fan_ctl.sh
+Restart=always
+RestartSec=1
+KillMode=mixed
+StandardOutput=append:/var/log/fan_ctl.log
+StandardError=append:/var/log/fan_ctl.log
+
+[Install]
+WantedBy=multi-user.target
