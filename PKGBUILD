@@ -12,6 +12,8 @@ sha256sums=('SKIP'
             'SKIP')
 
 package() {
+  mkdir -p "$pkgdir/usr/local/bin"
   install -Dm751 fan_ctl.sh "$pkgdir"/usr/local/bin/
+  mkdir -p "$pkgdir/usr/lib/systemd/system"
   install -Dm644 fan_ctl.service "$pkgdir"/usr/lib/systemd/system/
 }
