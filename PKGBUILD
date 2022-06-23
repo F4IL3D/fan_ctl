@@ -12,10 +12,6 @@ sha256sums=('SKIP'
             'SKIP')
 
 package() {
-  install -dm755 "$pkgdir"/usr/sbin/
-  install -Dm755 fan_ctl.sh "$pkgdir"/usr/sbin/
-  install -dm644 "$pkgdir"/usr/lib/systemd/system/
+  install -Dm751 fan_ctl.sh "$pkgdir"/usr/local/bin/
   install -Dm644 fan_ctl.service "$pkgdir"/usr/lib/systemd/system/
-  
-  systemctl daemon-reload
 }
