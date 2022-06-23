@@ -1,5 +1,7 @@
 #!/usr/sbin/env zsh
 
+logging=$1
+
 # set LC_NUMERIC to C because in german decimal places are specified with ,
 export LC_NUMERIC="C"
 
@@ -18,66 +20,68 @@ log_timer=30
 
 function log() {
   args=($@)
-  format="%8s |"
+  format="%10s |%8s |"
   case ${args[1]} in
     "head")
-      printf $format "Time"
+      printf $format "Date" "Time"
       for i in {2..${#args[@]}}; do
-        printf $format ${args[$i]}
+        printf "%8s |" ${args[$i]}
       done
       ;;
     *)
-      printf $format $(date +%T)
+      printf $format $(date +%x) $(date +%T)
       for i in ${args[@]}; do
-        printf $format $i
+        printf "%8s |" $i
       done
       ;;
   esac
   printf "\n"
 }
 
-declare -a ids=( \
-  0x01 \
-  0x02 \
-  0x0a \
-  0x0b \
-  0x0c \
-  0xb0 \
-  0xb4 \
-  0xb8 \
-  0xbc \
-  0xd0 \
-  0xd4 \
-  0xd8 \
-  0xdc \
-)
+if [[ $logging ]]; then
+  declare -a ids=( \
+    0x01 \
+    0x02 \
+    0x0a \
+    0x0b \
+    0x0c \
+    0xb0 \
+    0xb4 \
+    0xb8 \
+    0xbc \
+    0xd0 \
+    0xd4 \
+    0xd8 \
+    0xdc \
+  )
 
-declare -a header=( \
-  CPU-1 \
-  CPU-2 \
-  PCH \
-  SYSTEM \
-  PER \
-  DIMMA1 \
-  DIMMB1 \
-  DIMMC1 \
-  DIMMD1 \
-  DIMME1 \
-  DIMMF1 \
-  DIMMG1 \
-  DIMMH1 \
-)
+  declare -a header=( \
+    CPU-1 \
+    CPU-2 \
+    PCH \
+    SYSTEM \
+    PER \
+    DIMMA1 \
+    DIMMB1 \
+    DIMMC1 \
+    DIMMD1 \
+    DIMME1 \
+    DIMMF1 \
+    DIMMG1 \
+    DIMMH1 \
+  )
 
-# only for logging at the moment
-declare -a label=( \
-  "NVME-0" \
-  "NVME-1" \
-  "ST5-0" \
-  "ST5-1" \
-  "MX3-0" \
-  "MX3-1" \
-  "DOM" \
-)
+  # only for logging at the moment
+  declare -a label=( \
+    "NVME-0" \
+    "NVME-1" \
+    "ST5-0" \
+    "ST5-1" \
+    "MX3-0" \
+    "MX3-1" \
+    "DOM" \
+  )
+fi
 
 # only for logging at the moment
 function storTemp() {
@@ -151,25 +155,25 @@ fi
 
 start_timer=$(date +%s)
 
-echo
-echo $(date)
-echo
-
-log head "DUTY" ${header[@]} ${label[@]}
+if [[ $logging ]]; then
+  log head "DUTY" ${header[@]} ${label[@]}
+fi
 
 while true
 do
   pid=0
 
-  declare -a t
+  if [[ $logging ]]; then
+    declare -a t
 
-  for i in {1..${#header[@]}};do
-        t[$i]=$(getTemps ${ids[$i]})
-  done
+    for i in {1..${#header[@]}};do
+          t[$i]=$(getTemps ${ids[$i]})
+    done
 
-  #Tcpu1=$(getTemps 0x01)
-  #Tcpu2=$(getTemps 0x02)
-  Tsum=$(printf "%.2f" $(( (${t[1]} + ${t[2]}) / 2)))
+    Tsum=$(printf "%.2f" $(((${t[1]} + ${t[2]}) / 2)))
+  else
+    Tsum=$(printf "%.2f" $((($(getTemps 0x01) + $(getTemps 0x02)) / 2)))
+  fi
 
   cZone=$(getFanDuty 0)
   pZone=$(getFanDuty 1)
@@ -190,8 +194,10 @@ do
 
   # greater equal because processing ipmi raw cmd took up to 3 sec
   if [[ $(( $(date +%s) - $start_timer )) -ge $log_timer ]]; then
-    storTemp
-    log $pid $t[@]
+    if [[ $logging ]]; then
+      storTemp
+      log $pid $t[@]
+    fi
     start_timer=$(date +%s)
   fi
 

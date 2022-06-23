@@ -4,6 +4,8 @@ Description=IPMI Fan Controller
 
 [Service]
 Type=simple
+# use this to enable logging
+#ExecStart=/usr/local/bin/fan_ctl.sh 1
 ExecStart=/usr/local/bin/fan_ctl.sh
 Restart=always
 RestartSec=1
