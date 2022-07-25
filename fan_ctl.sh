@@ -148,7 +148,7 @@ MODE=$($IPMI raw 0x30 0x45 0x00 | xargs)
 if [[ $MODE -ne 01 ]]; then
   $IPMI raw 0x30 0x45 0x01 0x01
   # 0 = Standard 1 = Full 2 = Optimal 4 = HeavyIO
-  $IPMI rest warm # most of the time not necessary
+  $IPMI mc rest warm # most of the time not necessary
 
   sleep $reset_timer
 fi
